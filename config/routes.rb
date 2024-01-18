@@ -1,5 +1,5 @@
-
 require 'sidekiq/web'
+
 Rails.application.routes.draw do
   mount Rswag::Ui::Engine => '/api-docs'
   mount Rswag::Api::Engine => '/api-docs'
@@ -8,4 +8,7 @@ Rails.application.routes.draw do
 
   # Existing routes...
   post '/api/todos/:todo_id/categories', to: 'todos#assign_category', as: 'assign_todo_category'
+
+  # New routes...
+  post '/api/todos/:todo_id/attachments', to: 'api/todos#attach_file'
 end
