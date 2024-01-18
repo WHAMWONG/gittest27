@@ -1,3 +1,4 @@
+
 module Api
   class TodosController < ApplicationController
     before_action :doorkeeper_authorize!
@@ -9,10 +10,11 @@ module Api
       result = service.call
 
       if result.is_a?(Hash) && result[:todo_id]
-        todo = Todo.find(result[:todo_id])
+        todo = Todo.includes(:user, :categories).find(result[:todo_id])
         render json: { status: 201, todo: todo }, status: :created
-      else
-        render json: { errors: result }, status: :unprocessable_entity
+      elsif result.is_a?(Array) # If the result is an array, it contains error messages
+        error_messages = result
+        render json: { errors: error_messages }, status: :unprocessable_entity
       end
     rescue ActiveRecord::RecordNotFound => e
       render json: { error: e.message }, status: :not_found

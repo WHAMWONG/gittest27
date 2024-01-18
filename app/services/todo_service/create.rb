@@ -1,14 +1,17 @@
+
 module TodoService
   require 'validators/datetime_in_future_validator'
   class Create
+    include ActiveModel::Model
     include ActiveModel::Validations
 
     validates :user_id, presence: true
-    validates :title, presence: true
+    validates :title, presence: true, length: { maximum: 255 }
     validates :due_date, presence: true, datetime_in_future: true
     validate :validate_recurrence, if: -> { is_recurring }
     validate :validate_category_ids, if: -> { category_ids.present? }
     validate :validate_attachments, if: -> { attachments.present? }
+    validate :validate_priority
 
     def initialize(user_id:, title:, description: nil, due_date:, priority:, is_recurring: false, recurrence: nil, category_ids: [], attachments: [])
       @user_id = user_id
@@ -22,7 +25,7 @@ module TodoService
       @attachments = attachments
     end
 
-    def call # Ensure that the custom validator is being required at the top of the file.
+    def call
       return errors.full_messages unless valid?
 
       user = User.find_by(id: @user_id)
@@ -57,6 +60,10 @@ module TodoService
       @category_ids.each do |category_id|
         errors.add(:category_ids, I18n.t('activerecord.errors.messages.invalid')) unless Category.exists?(category_id)
       end
+    end
+
+    def validate_priority
+      errors.add(:priority, "Invalid priority level.") unless Todo.priorities.keys.include?(@priority)
     end
 
     def validate_attachments
