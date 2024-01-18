@@ -1,11 +1,14 @@
+
 # typed: ignore
+require 'oauth_tokens_concern'
 module Api
   class BaseController < ActionController::API
     include ActionController::Cookies
     include Pundit::Authorization
-
+    include OauthTokensConcern
     # =======End include module======
 
+    before_action :doorkeeper_authorize!
     rescue_from ActiveRecord::RecordNotFound, with: :base_render_record_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :base_render_unprocessable_entity
     rescue_from Exceptions::AuthenticationError, with: :base_render_authentication_error

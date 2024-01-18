@@ -1,6 +1,24 @@
 module Api
-  class TodosController < BaseController
+  class TodosController < ApplicationController
     before_action :doorkeeper_authorize!
+
+    def create
+      authorize Todo, policy_class: ApplicationPolicy
+
+      service = TodoService::Create.new(todo_params)
+      result = service.call
+
+      if result.is_a?(Hash) && result[:todo_id]
+        todo = Todo.find(result[:todo_id])
+        render json: { status: 201, todo: todo }, status: :created
+      else
+        render json: { errors: result }, status: :unprocessable_entity
+      end
+    rescue ActiveRecord::RecordNotFound => e
+      render json: { error: e.message }, status: :not_found
+    rescue StandardError => e
+      render json: { error: e.message }, status: :internal_server_error
+    end
 
     def attach_file
       todo = Todo.find_by(id: params[:todo_id])
@@ -45,6 +63,19 @@ module Api
     end
 
     private
+
+    def todo_params
+      params.permit(
+        :user_id,
+        :title,
+        :description,
+        :due_date,
+        :priority,
+        :is_recurring,
+        :recurrence,
+        :category_id
+      )
+    end
 
     def todo_category_params
       params.require(:todo_category).permit(:todo_id, :category_id)

@@ -11,4 +11,7 @@ Rails.application.routes.draw do
 
   # New routes...
   post '/api/todos/:todo_id/attachments', to: 'api/todos#attach_file'
+
+  # Merged new route from new code
+  post '/api/todos', to: 'todos#create'
 end
