@@ -7,6 +7,8 @@ class Todo < ApplicationRecord
   enum priority: %w[low medium high], _suffix: true
   enum recurrence: %w[daily weekly monthly], _suffix: true
 
+  validates :title, uniqueness: { scope: :user_id }
+
   # validations
 
   # end for validations
