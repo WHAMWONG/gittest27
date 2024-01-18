@@ -1,6 +1,6 @@
 
 module Api
-  class TodosController < ApiController
+  class TodosController < ApplicationController
     include Pundit::Authorization
     before_action :doorkeeper_authorize!
 
@@ -8,7 +8,7 @@ module Api
       authorize Todo, policy_class: ApplicationPolicy
 
       service = TodoService::Create.new(todo_params)
-      result = service.call # Call the service to create a todo item
+      result = service.call # Call the service to create a todo item with the provided parameters
 
       if result.is_a?(Hash) && result[:todo_id]
         todo = Todo.includes(:user, :categories).find(result[:todo_id])
@@ -70,7 +70,7 @@ module Api
 
     private
 
-    def todo_params
+    def todo_params # Update the todo_params method to permit the new parameters
       params.permit(
         :user_id,
         :title, # Permit the title parameter
@@ -78,8 +78,9 @@ module Api
         :due_date,
         :priority,
         :is_recurring,
-        :recurrence,
-        :category_id
+        :recurrence, # Permit the recurrence parameter
+        :category_id # Permit the category_id parameter
+        # Note: The validation for these parameters is handled in the TodoService::Create service
       )
     end # End of private methods
   end
