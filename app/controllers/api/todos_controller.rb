@@ -70,7 +70,7 @@ module Api
 
     private
 
-    def todo_params # Update the todo_params method to permit the new parameters
+    def todo_params # Update the todo_params method to permit the new parameters including category_ids and attachments
       params.permit(
         :user_id,
         :title, # Permit the title parameter
@@ -78,8 +78,9 @@ module Api
         :due_date,
         :priority,
         :is_recurring,
-        :recurrence, # Permit the recurrence parameter
-        :category_id # Permit the category_id parameter
+        :recurrence, # Permit the recurrence parameter if is_recurring is true
+        category_ids: [], # Permit the category_ids parameter as an array of integers
+        attachments: [] # Permit the attachments parameter as an array of files
         # Note: The validation for these parameters is handled in the TodoService::Create service
       )
     end # End of private methods
