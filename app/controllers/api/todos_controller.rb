@@ -1,6 +1,7 @@
 
 module Api
   class TodosController < ApplicationController
+    include Pundit::Authorization
     before_action :doorkeeper_authorize!
 
     def create
@@ -48,13 +49,15 @@ module Api
     def assign_category
       todo_id = params[:todo_id]
       category_id = params.require(:category).permit(:category_id)[:category_id]
-
+      
       todo = Todo.find_by(id: todo_id)
       return render json: { error: "Todo item not found." }, status: :not_found unless todo
 
       unless Category.exists?(category_id)
         return render json: { error: "Category not found." }, status: :not_found
       end
+
+      authorize todo, :assign_category?
 
       begin
         todo_category = todo.todo_categories.create!(category_id: category_id)

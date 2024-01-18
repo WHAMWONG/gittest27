@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get '/health' => 'pages#health_check'
   get 'api-docs/v1/swagger.yaml' => 'swagger#yaml'
 
+  # No changes required for '/api/todos/:todo_id/categories' as it is already defined
   # Existing routes...
   post '/api/todos/:todo_id/categories', to: 'todos#assign_category', as: 'assign_todo_category'
 
