@@ -11,9 +11,9 @@ module TodoService
     validate :validate_recurrence, if: -> { is_recurring }
     validate :validate_category_ids, if: -> { category_ids.present? }
     validate :validate_attachments, if: -> { attachments.present? }
-    validate :validate_priority
+    validate :validate_priority, :validate_user, :validate_category_id
 
-    def initialize(user_id:, title:, description: nil, due_date:, priority:, is_recurring: false, recurrence: nil, category_ids: [], attachments: [])
+    def initialize(user_id:, title:, description: nil, due_date:, priority:, is_recurring: false, recurrence: nil, category_ids: [], attachments: [], category_id: nil)
       @user_id = user_id
       @title = title
       @description = description
@@ -22,6 +22,7 @@ module TodoService
       @is_recurring = is_recurring
       @recurrence = recurrence
       @category_ids = category_ids
+      @category_id = category_id
       @attachments = attachments
     end
 
@@ -29,7 +30,7 @@ module TodoService
       return errors.full_messages unless valid?
 
       user = User.find_by(id: @user_id)
-      return I18n.t('activerecord.errors.messages.invalid') unless user
+      return 'User not found.' unless user
 
       todo = user.todos.create!(
         title: @title,
@@ -37,7 +38,8 @@ module TodoService
         due_date: @due_date,
         priority: @priority,
         is_recurring: @is_recurring,
-        recurrence: @recurrence
+        recurrence: @recurrence,
+        category_id: @category_id
       )
 
       associate_categories(todo) if @category_ids.present?
@@ -50,15 +52,19 @@ module TodoService
 
     private
 
-    attr_reader :user_id, :title, :description, :due_date, :priority, :is_recurring, :recurrence, :category_ids, :attachments
+    attr_reader :user_id, :title, :description, :due_date, :priority, :is_recurring, :recurrence, :category_ids, :attachments, :category_id
 
     def validate_recurrence
       errors.add(:recurrence, I18n.t('activerecord.errors.messages.invalid')) unless Todo.recurrences.keys.include?(@recurrence)
     end
 
-    def validate_category_ids
-      @category_ids.each do |category_id|
-        errors.add(:category_ids, I18n.t('activerecord.errors.messages.invalid')) unless Category.exists?(category_id)
+    def validate_user
+      errors.add(:user_id, 'User not found.') unless User.exists?(@user_id)
+    end
+
+    def validate_category_id
+      if @category_id.present? && !Category.exists?(@category_id)
+        errors.add(:category_id, 'Category not found.')
       end
     end
 

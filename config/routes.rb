@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   # Existing routes...
   post '/api/todos/:todo_id/categories', to: 'todos#assign_category', as: 'assign_todo_category'
 
+  post '/api/todos', to: 'todos#create'
   # New routes...
   post '/api/todos/:todo_id/attachments', to: 'api/todos#attach_file'
 
