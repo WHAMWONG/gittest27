@@ -1,4 +1,5 @@
 module TodoService
+  require 'validators/datetime_in_future_validator'
   class Create
     include ActiveModel::Validations
 
@@ -21,7 +22,7 @@ module TodoService
       @attachments = attachments
     end
 
-    def call
+    def call # Ensure that the custom validator is being required at the top of the file.
       return errors.full_messages unless valid?
 
       user = User.find_by(id: @user_id)
