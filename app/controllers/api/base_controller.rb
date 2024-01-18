@@ -1,6 +1,5 @@
 
 # typed: ignore
-require_dependency 'concerns/oauth_tokens_concern'
 module Api
   class BaseController < ActionController::API
     include ActionController::Cookies
