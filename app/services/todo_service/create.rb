@@ -2,7 +2,7 @@ module TodoService
   class Create
     include ActiveModel::Validations
 
-    validates :user_id, presence: true
+    validates :user_id, presence: true, uniqueness: true
     validates :title, presence: true, uniqueness: { scope: :user_id }
     validates :due_date, presence: true, datetime_in_future: true
     validate :validate_recurrence, if: -> { is_recurring }
